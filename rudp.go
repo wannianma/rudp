@@ -192,6 +192,7 @@ func (this *messageQueue) pop(id int) *message {
 		return nil
 	}
 	m := this.head
+	// reviceMinID Must == head.id
 	if id >= 0 && m.id != id {
 		return nil
 	}
@@ -277,10 +278,12 @@ func (this *Rudp) Input(bts []byte) {
 			}
 			exe := this.addRequest
 			max := this.sendID
+			// TYPE_MISSING is response for TYPE_REQUEST
 			if len == TYPE_MISSING {
 				exe = this.addMissing
 				max = this.recvIDMax
 			}
+			// getID is for id is > 64K
 			exe(this.getID(max, bts[0], bts[1]), this.getID(max, bts[2], bts[3]))
 			bts = bts[4:]
 			sz -= 4
@@ -398,6 +401,7 @@ func (this *Rudp) addMissing(min, max int) {
 		head = this.recvQueue.head.id
 	}
 	dbg("add missing %v-%v,min %v,head %v", min, max, this.recvIDMin, head)
+	// ???
 	this.recvIDMin = max + 1
 	this.checkMissing(true)
 }
